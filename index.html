@@ -272,7 +272,12 @@
                 `;
             });
         }
-
+// --- АВТОМАТИЧЕСКАЯ УСТАНОВКА СЕГОДНЯШНЕЙ ДАТЫ ---
+        const today = new Date();
+        // Корректируем часовой пояс, чтобы дата не сбивалась
+        const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        document.getElementById('datePicker').value = localDate;
+        // -------------------------------------------------
         function updateUI() {
             const selectedDate = document.getElementById('datePicker').value;
             const selectedGroup = document.getElementById('groupSelect').value;

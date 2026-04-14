@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание ФКМ | Академия МВД</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; }
+        .bg-amia-primary { background-color: #1e3a8a; }
+        .text-amia { color: #1e3a8a; }
+        
+        .glass-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card-free { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-left: 8px solid #22c55e; }
+        .card-vacation { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); border-left: 8px solid #eab308; }
+        .card-move { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); border-left: 8px solid #f97316; }
+        .card-lesson { border-left: 8px solid #3b82f6; }
+
+        .period-badge { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.5; transition: 0.2s; }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+        
+        .btn-toggle { transition: all 0.3s; }
+        .btn-toggle.active { background-color: #3b82f6; color: white; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); }
+        .btn-toggle.inactive { background-color: #f1f5f9; color: #64748b; }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <header class="bg-amia-primary text-white shadow-2xl relative overflow-hidden rounded-b-3xl">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="container mx-auto px-6 py-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="bg-white/10 p-4 rounded-3xl backdrop-blur-sm border border-white/20">
+                    <i class="fa-solid fa-shield-halved text-white text-4xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-1">ФКМ Академии МВД</h1>
+                    <p class="text-blue-200 font-medium">Интерактивное расписание • 3 курс</p>
+                </div>
+            </div>
+            <div id="currentDayDisplay" class="text-lg md:text-xl font-bold bg-white/10 px-6 py-3 rounded-3xl border border-white/20 backdrop-blur-sm text-center min-w-[220px]">
+                </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-grow max-w-5xl">
+        
+        <div class="flex justify-center mb-8 gap-4">
+            <button onclick="setViewMode('day')" id="btnDay" class="btn-toggle active px-6 py-3 rounded-3xl font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-calendar-day"></i> На день
+            </button>
+            <button onclick="setViewMode('week')" id="btnWeek" class="btn-toggle inactive px-6 py-3 rounded-3xl font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-calendar-week"></i> На неделю
+            </button>
+        </div>
+
+        <div class="glass-card p-6 mb-10 flex flex-col md:flex-row gap-6 border border-gray-100 rounded-3xl">
+            <div class="w-full md:w-1/3">
+                <label class="flex items-center text-sm font-bold text-gray-500 mb-2 uppercase tracking-wider pl-2">
+                    <i class="fa-solid fa-user-group text-blue-500 mr-2"></i> Группа
+                </label>
+                <div class="relative">
+                    <select id="groupSelect" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-3xl focus:border-blue-500 outline-none text-lg font-bold text-gray-700 appearance-none cursor-pointer">
+                        <option value="3103">Группа 3103</option>
+                        <option value="3104">Группа 3104</option>
+                        <option value="3105" selected>Группа 3105</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="w-full md:w-2/3">
+                <label class="flex items-center text-sm font-bold text-gray-500 mb-2 uppercase tracking-wider pl-2">
+                    <i class="fa-solid fa-calendar-check text-blue-500 mr-2"></i> Дата
+                </label>
+                <div class="flex items-center gap-3">
+                    <button onclick="changeDate(-1)" class="p-4 bg-gray-50 hover:bg-blue-100 text-blue-500 rounded-3xl border-2 border-gray-100 transition duration-200">
+                        <i class="fa-solid fa-chevron-left text-xl"></i>
+                    </button>
+                    <input type="date" id="datePicker" value="2026-04-20" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-3xl focus:border-blue-500 outline-none text-lg font-bold text-gray-700 text-center cursor-pointer">
+                    <button onclick="changeDate(1)" class="p-4 bg-gray-50 hover:bg-blue-100 text-blue-500 rounded-3xl border-2 border-gray-100 transition duration-200">
+                        <i class="fa-solid fa-chevron-right text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="scheduleList" class="space-y-6 pb-12">
+            </div>
+    </main>
+
+    <script>
+        let viewMode = 'day'; 
+
+        const lessons = [
+            // --- ПРЕДЫДУЩАЯ НЕДЕЛЯ (13.04 - 18.04) ---
+            { date: "2026-04-13", group: "3105", period: 1, time: "08:30 - 09:50", subject: "МПП", type: "Семинар", room: "ауд. 2-421 ФКМ", teacher: "Озеров А.А." },
+            { date: "2026-04-13", group: "3105", period: 2, time: "10:05 - 11:25", subject: "ППФП", type: "Пр. занятие", room: "с/з МАШ", teacher: "Равко Р.В." },
+            { date: "2026-04-13", group: "3105", period: 3, time: "11:40 - 13:00", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-13", group: "3105", period: 4, time: "14:00 - 15:20", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-13", group: "3105", period: 6, time: "17:05 - 18:30", subject: "КСиС (БГУИР)", type: "Лекция", room: "БГУИР 510", teacher: "-" },
+
+            { date: "2026-04-14", group: "3105", period: 1, time: "08:30 - 09:50", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-14", group: "3105", period: 2, time: "10:05 - 11:25", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-14", group: "3105", period: 3, time: "11:40 - 13:00", subject: "Криминалистика", type: "Пр. занятие", room: "ауд. 2-421 ФКМ", teacher: "Волосюк В.В." },
+            { date: "2026-04-14", group: "3105", period: 4, time: "14:00 - 15:20", subject: "Квалификация преступлений", type: "Лекция", room: "ауд. 2-421 ФКМ", teacher: "Реутская Е.А." },
+            { date: "2026-04-14", group: "3105", period: 6, time: "17:05 - 20:25", subject: "КСиС (БГУИР)", type: "Лаб. работа", room: "БГУИР 510", teacher: "-" },
+
+            { date: "2026-04-15", group: "3105", period: 1, time: "08:30 - 09:50", subject: "Криминалистика", type: "Пр. занятие", room: "ауд. 2-417 ФКМ", teacher: "Волосюк В.В." },
+            { date: "2026-04-15", group: "3105", period: 2, time: "10:05 - 11:25", subject: "Гражданское право", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Ефременко Е.М." },
+            { date: "2026-04-15", group: "3105", period: 3, time: "11:40 - 13:00", subject: "Гражданское право", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Ефременко Е.М." },
+            { date: "2026-04-15", group: "3105", period: 4, time: "14:00 - 15:20", subject: "Гражданский процесс", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Фицук Т.М." },
+
+            { date: "2026-04-16", group: "3105", period: 1, time: "08:30 - 09:50", subject: "Переезд", type: "Орг. время", room: "ауд. 222 ➔ 510", teacher: "-" },
+            { date: "2026-04-16", group: "3105", period: 2, time: "10:05 - 11:25", subject: "ИОСД", type: "Пр. занятие", room: "ауд. 222 МАШ", teacher: "Власюк А.В." },
+            { date: "2026-04-16", group: "3105", period: 3, time: "11:40 - 13:00", subject: "ИОСД", type: "Пр. занятие", room: "ауд. 222 МАШ", teacher: "Власюк А.В." },
+            { date: "2026-04-16", group: "3105", period: 4, time: "14:00 - 15:20", subject: "Переезд", type: "Орг. время", room: "ауд. 222 ➔ 508", teacher: "-" },
+
+            { date: "2026-04-17", group: "3105", period: 1, time: "08:30 - 09:50", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-17", group: "3105", period: 2, time: "10:05 - 11:25", subject: "МПП", type: "Пр. занятие", room: "ауд. 2-421 ФКМ", teacher: "Озеров А.А." },
+            { date: "2026-04-17", group: "3105", period: 3, time: "11:40 - 13:00", subject: "ТСП*", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Егоров Д.А.", secret: true },
+            { date: "2026-04-17", group: "3105", period: 4, time: "14:00 - 15:20", subject: "Криминалистика", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Рубис А.С." },
+
+            { date: "2026-04-18", group: "3105", period: 1, time: "08:30 - 09:50", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-18", group: "3105", period: 2, time: "10:05 - 11:25", subject: "Гражданский процесс", type: "Семинар", room: "ауд. 2-421 ФКМ", teacher: "Фицук Т.М." },
+            { date: "2026-04-18", group: "3105", period: 3, time: "11:40 - 13:00", subject: "Гражданское право (ч.2)", type: "Семинар", room: "ауд. 2-421 ФКМ", teacher: "Колбасин Д.А." },
+
+            // --- НОВАЯ НЕДЕЛЯ (20.04 - 30.04) ---
+            { date: "2026-04-20", group: "3105", period: 1, time: "Весь день", subject: "отпуск", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-21", group: "3105", period: 1, time: "Весь день", subject: "отпуск", type: "Отдых", room: "-", teacher: "-" },
+            
+            { date: "2026-04-22", group: "3105", period: 1, time: "08:30 - 09:50", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-22", group: "3105", period: 2, time: "10:05 - 11:25", subject: "Гражд. пр. (ч.2)", type: "Семинар", room: "ауд. 2-421 ФКМ", teacher: "Колбасин Д.А." },
+            { date: "2026-04-22", group: "3105", period: 3, time: "11:40 - 13:00", subject: "ОРД ОВД*", type: "Лекция", room: "Л/з № 3 МАШ", teacher: "Мартынов А.О.", secret: true },
+            { date: "2026-04-22", group: "3105", period: 4, time: "14:00 - 15:20", subject: "ППФП", type: "Пр. занятие", room: "с/з МАШ", teacher: "Равко Р.В. и др." },
+
+            { date: "2026-04-23", group: "3105", period: 1, time: "08:30 - 09:50", subject: "ОРД ОВД*", type: "Пр. занятие", room: "ауд. 237 МАШ", teacher: "Ковалик Б.В.", secret: true },
+            { date: "2026-04-23", group: "3105", period: 2, time: "10:05 - 11:25", subject: "Квал. прест-й", type: "Семинар", room: "ауд. 2-421 ФКМ", teacher: "Сулимов М.А." },
+            { date: "2026-04-23", group: "3105", period: 3, time: "11:40 - 13:00", subject: "ППФП", type: "Пр. занятие", room: "с/з МАШ", teacher: "Равко Р.В. и др." },
+            { date: "2026-04-23", group: "3105", period: 4, time: "14:00 - 15:20", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+
+            { date: "2026-04-24", group: "3105", period: 1, time: "08:30 - 09:50", subject: "Огневая подготовка", type: "Пр. занятие", room: "Тир МАШ", teacher: "Царь В.В." },
+            { date: "2026-04-24", group: "3105", period: 2, time: "10:05 - 11:25", subject: "свободное время", type: "Отдых", room: "-", teacher: "-" },
+            { date: "2026-04-24", group: "3105", period: 3, time: "11:40 - 13:00", subject: "ТСП*", type: "Пр. занятие", room: "228 / 222 МАШ", teacher: "Егоров Д.А. / Денисевич М.В.", secret: true },
+            { date: "2026-04-24", group: "3105", period: 4, time: "14:00 - 15:20", subject: "ТСП*", type: "Пр. занятие", room: "228 / 222 МАШ", teacher: "Егоров Д.А. / Денисевич М.В.", secret: true },
+
+            { date: "2026-04-25", group: "3105", period: 1, time: "08:30 - 09:50", subject: "Криминалистика", type: "Лекция", room: "Л/з № 3 МАШ", teacher: "Костюкевич Д.В." },
+            { date: "2026-04-25", group: "3105", period: 2, time: "10:05 - 11:25", subject: "Гражданский процесс", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Фицук Т.М." },
+            { date: "2026-04-25", group: "3105", period: 3, time: "11:40 - 13:00", subject: "Гражданский процесс", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Фицук Т.М." },
+
+            { date: "2026-04-27", group: "3105", period: 1, time: "08:30 - 09:50", subject: "Криминалистика", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Костюкевич Д.В." },
+            { date: "2026-04-27", group: "3105", period: 2, time: "10:05 - 11:25", subject: "МПП (ч.1)", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Бородич А.И." },
+            { date: "2026-04-27", group: "3105", period: 3, time: "11:40 - 13:00", subject: "МПП (ч.2)", type: "Лекция", room: "Л/з № 2 МАШ", teacher: "Середа Р.А." },
+            { date: "2026-04-27", group: "3105", period: 4, time: "14:00 - 15:20", subject: "Крим-ка", type: "Пр. занятие", room: "2-421 / 2-417 ФКМ", teacher: "Преп. 1.6 / Волосюк В.В." },
+
+            { date: "2026-04-28", group: "3105", period: 1, time: "08:30 - 09:50", subject: "ППФП", type: "Пр. занятие", room: "с/з МАШ", teacher: "Равко Р.В. и др." },
+            { date: "2026-04-28", group: "3105", period: 2, time: "10:05 - 11:25", subject: "Огневая подготовка", type: "Пр. занятие", room: "Тир МАШ", teacher: "Царь В.В." },
+            { date: "2026-04-28", group: "3105", period: 3, time: "11:40 - 13:00", subject: "Гражд. пр-с", type: "Семинар", room: "ауд. 2-421 ФКМ", teacher: "Фицук Т.М." },
+            { date: "2026-04-28", group: "3105", period: 4, time: "14:00 - 15:20", subject: "ОРД ОВД*", type: "Пр. занятие", room: "ауд. 222 МАШ", teacher: "Ковалик Б.В.", secret: true },
+            { date: "2026-04-28", group: "3105", period: 6, time: "17:05 - 20:25", subject: "КСиС (БГУИР)", type: "Лаб. работа", room: "БГУИР 510", teacher: "-" },
+
+            { date: "2026-04-29", group: "3105", period: 1, time: "08:30 - 09:50", subject: "ППФП", type: "Пр. занятие", room: "спортгородок", teacher: "Равко Р.В. и др." },
+            { date: "2026-04-29", group: "3105", period: 2, time: "10:05 - 11:25", subject: "Крим-ка", type: "Пр. занятие", room: "ауд. 2-421 ФКМ", teacher: "Преп. 1.6" },
+            { date: "2026-04-29", group: "3105", period: 3, time: "11:40 - 13:00", subject: "ОРД ОВД*", type: "Пр. занятие", room: "ауд. 222 МАШ", teacher: "Ковалик Б.В.", secret: true },
+            { date: "2026-04-29", group: "3105", period: 4, time: "14:00 - 15:20", subject: "Огневая подготовка", type: "Пр. занятие", room: "Тир МАШ", teacher: "Царь В.В." },
+
+            { date: "2026-04-30", group: "3105", period: 1, time: "08:30 - 09:50", subject: "ТСП*", type: "Пр. занятие", room: "228 / 243 МАШ", teacher: "Егоров Д.А. / Денисевич М.В.", secret: true },
+            { date: "2026-04-30", group: "3105", period: 2, time: "10:05 - 11:25", subject: "ТСП*", type: "Пр. занятие", room: "228 / 243 МАШ", teacher: "Егоров Д.А. / Денисевич М.В.", secret: true },
+            { date: "2026-04-30", group: "3105", period: 3, time: "11:40 - 13:00", subject: "ППФП", type: "Пр. занятие", room: "спортгородок", teacher: "Равко Р.В." },
+            { date: "2026-04-30", group: "3105", period: 4, time: "14:00 - 15:20", subject: "ИОСД", type: "Пр. занятие", room: "509 / 510 МАШ", teacher: "Ковалев Н.Н. / Власюк А.В." }
+        ];
+
+        const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+        const months = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+
+        function changeDate(offset) {
+            const dateInput = document.getElementById('datePicker');
+            const d = new Date(dateInput.value);
+            
+            // Если выбран режим недели, умножаем шаг на 7 дней
+            if (viewMode === 'week') {
+                d.setDate(d.getDate() + (offset * 7));
+            } else {
+                d.setDate(d.getDate() + offset);
+            }
+            
+            dateInput.value = d.toISOString().split('T')[0];
+            updateUI();
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.getElementById('btnDay').className = mode === 'day' ? 'btn-toggle active px-6 py-3 rounded-3xl font-bold text-sm uppercase tracking-wider flex items-center gap-2' : 'btn-toggle inactive px-6 py-3 rounded-3xl font-bold text-sm uppercase tracking-wider flex items-center gap-2';
+            document.getElementById('btnWeek').className = mode === 'week' ? 'btn-toggle active px-6 py-3 rounded-3xl font-bold text-sm uppercase tracking-wider flex items-center gap-2' : 'btn-toggle inactive px-6 py-3 rounded-3xl font-bold text-sm uppercase tracking-wider flex items-center gap-2';
+            updateUI();
+        }
+
+        function getCardStyle(subject) {
+            if (subject === "свободное время") return { class: "card-free", icon: "fa-couch text-green-600" };
+            if (subject === "отпуск") return { class: "card-vacation text-center", icon: "fa-umbrella-beach text-yellow-600" };
+            if (subject === "Переезд") return { class: "card-move", icon: "fa-person-walking-luggage text-orange-500" };
+            
+            let icon = "fa-book-open text-blue-500";
+            if (subject.includes("Криминалистика") || subject.includes("Крим-ка")) icon = "fa-microscope text-purple-500";
+            if (subject.includes("Право") || subject.includes("процесс") || subject.includes("МПП") || subject.includes("Квал")) icon = "fa-scale-balanced text-yellow-600";
+            if (subject.includes("ТСП") || subject.includes("ОРД")) icon = "fa-user-secret text-gray-700";
+            if (subject.includes("ППФП")) icon = "fa-dumbbell text-green-600";
+            if (subject.includes("ИОСД") || subject.includes("КСиС")) icon = "fa-laptop-code text-blue-500";
+            if (subject.includes("Огневая")) icon = "fa-crosshairs text-red-600";
+            
+            return { class: "card-lesson", icon: icon };
+        }
+
+        function renderLessons(filtered, container) {
+            if (filtered.length === 0) {
+                container.innerHTML += `
+                    <div class="glass-card text-center py-16 rounded-3xl flex flex-col items-center">
+                        <i class="fa-solid fa-mug-hot text-5xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl text-gray-800 font-bold">Нет занятий</h3>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const style = getCardStyle(item.subject);
+                const secretBadge = item.secret ? `<span class="bg-red-50 text-red-600 text-[10px] px-2.5 py-1 rounded-xl font-black flex items-center uppercase tracking-wider"><i class="fa-solid fa-lock text-[10px] mr-1.5"></i>Секретно</span>` : '';
+                
+                let detailsHtml = '';
+                if (item.subject !== "свободное время" && item.subject !== "отпуск") {
+                    detailsHtml = `
+                        <div class="flex items-center gap-2 mb-2 flex-wrap">
+                            <span class="text-xs font-black text-blue-800 px-3 py-1 bg-white/60 rounded-xl uppercase tracking-wider">${item.type}</span>
+                            ${secretBadge}
+                        </div>
+                        <h2 class="text-xl font-extrabold text-gray-800 leading-tight mb-3 flex items-center gap-3">
+                            <i class="fa-solid ${style.icon} opacity-80 text-xl w-6"></i> ${item.subject}
+                        </h2>
+                        <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-gray-600">
+                            <span class="flex items-center"><i class="fa-solid fa-user-tie mr-2 text-blue-400"></i>${item.teacher}</span>
+                            <span class="flex items-center"><i class="fa-solid fa-location-dot mr-2 text-blue-400"></i>${item.room}</span>
+                        </div>
+                    `;
+                } else {
+                    detailsHtml = `
+                        <h2 class="text-2xl font-extrabold text-gray-800 flex items-center gap-4">
+                            <i class="fa-solid ${style.icon} text-3xl"></i> ${item.subject}
+                        </h2>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="glass-card p-5 flex flex-col md:flex-row md:items-stretch gap-5 rounded-3xl ${style.class}">
+                        <div class="period-badge rounded-2xl p-4 flex flex-col justify-center items-center md:w-36 shrink-0 border border-blue-50/50">
+                            <div class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Пара ${item.period}</div>
+                            <div class="text-lg font-black text-amia tracking-tight text-center">${item.time}</div>
+                        </div>
+                        <div class="flex-grow flex flex-col justify-center">${detailsHtml}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateUI() {
+            const selectedDate = document.getElementById('datePicker').value;
+            const selectedGroup = document.getElementById('groupSelect').value;
+            const listContainer = document.getElementById('scheduleList');
+            const dayDisplay = document.getElementById('currentDayDisplay');
+
+            const dateObj = new Date(selectedDate);
+            dayDisplay.innerHTML = `<span class="text-blue-200">${daysOfWeek[dateObj.getDay()]}</span><br/>${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
+            listContainer.innerHTML = '';
+
+            if (viewMode === 'day') {
+                const filtered = lessons.filter(l => l.date === selectedDate && l.group === selectedGroup).sort((a, b) => a.period - b.period);
+                renderLessons(filtered, listContainer);
+            } else {
+                // Логика Недели: находим понедельник выбранной даты
+                const currentDay = dateObj.getDay();
+                const diff = dateObj.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
+                const monday = new Date(dateObj.setDate(diff));
+
+                for (let i = 0; i < 6; i++) { // Пн - Сб
+                    const targetDate = new Date(monday);
+                    targetDate.setDate(monday.getDate() + i);
+                    const dateStr = targetDate.toISOString().split('T')[0];
+                    
+                    const filtered = lessons.filter(l => l.date === dateStr && l.group === selectedGroup).sort((a, b) => a.period - b.period);
+                    
+                    if (filtered.length > 0 || dateStr === selectedDate) {
+                        listContainer.innerHTML += `
+                            <div class="mt-8 mb-4 pl-4 border-l-4 border-blue-300">
+                                <h3 class="text-xl font-bold text-gray-700">${daysOfWeek[targetDate.getDay()]}, <span class="text-blue-500">${targetDate.getDate()} ${months[targetDate.getMonth()]}</span></h3>
+                            </div>
+                        `;
+                        renderLessons(filtered, listContainer);
+                    }
+                }
+            }
+        }
+
+        document.getElementById('datePicker').addEventListener('change', updateUI);
+        document.getElementById('groupSelect').addEventListener('change', updateUI);
+
+        updateUI();
+    </script>
+</body>
+</html>

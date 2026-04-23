@@ -68,8 +68,8 @@
         
         <div class="flex items-center justify-between gap-2 mb-4">
             <div class="flex bg-white p-1 rounded-xl border border-gray-200 shrink-0">
-                <button onclick="setViewMode('day')" id="btnDay" class="btn-mode btn-active px-4 py-1.5 uppercase">День</button>
-                <button onclick="setViewMode('week')" id="btnWeek" class="btn-mode btn-inactive px-4 py-1.5 uppercase">Неделя</button>
+                <button onclick="setViewMode('day')" id="btnDay" class="btn-mode px-4 py-1.5 uppercase">День</button>
+                <button onclick="setViewMode('week')" id="btnWeek" class="btn-mode px-4 py-1.5 uppercase">Неделя</button>
             </div>
             <select id="groupSelect" class="bg-white border border-gray-200 rounded-xl px-2 py-1.5 text-[11px] sm:text-xs font-bold outline-none flex-grow max-w-[140px]">
                 <option value="" disabled selected>Группа...</option>
@@ -105,7 +105,7 @@
     </main>
 
     <script>
-        let viewMode = 'day';
+        let viewMode = localStorage.getItem('viewMode') || 'day';
 
         // База данных
         const lessons = [
@@ -160,7 +160,7 @@
             { date: "2026-04-27", group: "3105", period: 4, time: "14:00-15:20", subject: "Крим-ка", topic: "т. 22/2", type: "Пр. зан.", room: "2-421 ФКМ", teacher: "Волосюк В.В." },
             { date: "2026-04-28", group: "3105", period: 1, time: "08:30-09:50", subject: "ППФП", topic: "т. 29.4", type: "Пр. зан.", room: "с/з МАШ", teacher: "Равко Р.В." },
             { date: "2026-04-28", group: "3105", period: 2, time: "10:05-11:25", subject: "Огневая подготовка", topic: "т. 27.4", type: "Пр. зан.", room: "Тир МАШ", teacher: "Царь В.В." },
-            { date: "2026-04-28", group: "3105", period: 3, time: "11:40-13:00", subject: "Гражданский процесс", topic: "т. 35-36", type: "Сем.", room: "2-421 ФКМ", teacher: "Фицук Т.М." },
+            { date: "2026-04-28", group: "3105", period: 3, time: "11:40-13:00", subject: "Гражд. пр-с", topic: "т. 35-36", type: "Сем.", room: "2-421 ФКМ", teacher: "Фицук Т.М." },
             { date: "2026-04-28", group: "3105", period: 4, time: "14:00-15:20", subject: "ОРД ОВД*", topic: "т. 30/2", type: "Пр. зан.", room: "222 МАШ", teacher: "Ковалик Б.В.", secret: true },
             { date: "2026-04-28", group: "3105", period: 6, time: "17:05-20:25", subject: "КСиС (БГУИР)", topic: "Лаб.", type: "Вне вуза", room: "БГУИР 510", teacher: "-" },
             { date: "2026-04-29", group: "3105", period: 1, time: "08:30-09:50", subject: "ППФП", topic: "т. 5.1", type: "Пр. зан.", room: "спортгородок", teacher: "Равко Р.В." },
@@ -187,7 +187,7 @@
             { date: "2026-04-15", group: "3103", period: 2, time: "10:05-11:25", subject: "Гражданское право", topic: "т. 27.3", type: "Лекция", room: "Л/з 2 МАШ", teacher: "Ефременко Е.М." },
             { date: "2026-04-15", group: "3103", period: 3, time: "11:40-13:00", subject: "Гражданское право", topic: "т. 27.4, 28", type: "Лекция", room: "Л/з 2 МАШ", teacher: "Ефременко Е.М." },
             { date: "2026-04-15", group: "3103", period: 4, time: "14:00-15:20", subject: "Гражданский процесс", topic: "т. 34/2", type: "Лекция", room: "Л/з 2 МАШ", teacher: "Фицук Т.М." },
-            { date: "2026-04-16", group: "3103", period: 1, time: "08:30-09:50", subject: "Гражданский процесс", topic: "т. 34", type: "Сем.", room: "2-417 ФКМ", teacher: "Фицук Т.М." },
+            { date: "2026-04-16", group: "3103", period: 1, time: "08:30-09:50", subject: "Гражд. пр-с", topic: "т. 34", type: "Сем.", room: "2-417 ФКМ", teacher: "Фицук Т.М." },
             { date: "2026-04-16", group: "3103", period: 2, time: "10:05-11:25", subject: "ППФП", topic: "т. 29.2", type: "Пр. зан.", room: "с/з МАШ", teacher: "Равко / Турок" },
             { date: "2026-04-16", group: "3103", period: 3, time: "11:40-13:00", subject: "ИОСД", topic: "т. 3.2", type: "Пр. зан.", room: "431 / 429 МАШ", teacher: "Ковалев / Чехович" },
             { date: "2026-04-16", group: "3103", period: 4, time: "14:00-15:20", subject: "свободное время", topic: "", type: "Отдых", room: "-", teacher: "-" },
@@ -219,7 +219,7 @@
             { date: "2026-04-27", group: "3103", period: 2, time: "10:05-11:25", subject: "МПП (ч.1)", topic: "т. 22", type: "Лекция", room: "Л/з 2 МАШ", teacher: "Бородич А.И." },
             { date: "2026-04-27", group: "3103", period: 3, time: "11:40-13:00", subject: "МПП (ч.2)", topic: "т. 22", type: "Лекция", room: "Л/з 2 МАШ", teacher: "Середа Р.А." },
             { date: "2026-04-27", group: "3103", period: 4, time: "14:00-15:20", subject: "Огневая подготовка", topic: "т. 27.3", type: "Пр. зан.", room: "Тир МАШ", teacher: "Царь / Игнатович" },
-            { date: "2026-04-28", group: "3103", period: 1, time: "08:30-09:50", subject: "Гражданский процесс", topic: "т. 35-36", type: "Сем.", room: "2-417 ФКМ", teacher: "Фицук Т.М." },
+            { date: "2026-04-28", group: "3103", period: 1, time: "08:30-09:50", subject: "Гражд. пр-с", topic: "т. 35-36", type: "Сем.", room: "2-417 ФКМ", teacher: "Фицук Т.М." },
             { date: "2026-04-28", group: "3103", period: 2, time: "10:05-11:25", subject: "ОРД ОВД*", topic: "т. 30/2", type: "Пр. зан.", room: "237 МАШ", teacher: "Волосюк В.В.", secret: true },
             { date: "2026-04-28", group: "3103", period: 3, time: "11:40-13:00", subject: "Огневая подготовка", topic: "т. 27.4", type: "Пр. зан.", room: "Тир МАШ", teacher: "Царь / Игнатович" },
             { date: "2026-04-28", group: "3103", period: 4, time: "14:00-15:20", subject: "ППФП", topic: "т. 5.1", type: "Пр. зан.", room: "спортгородок", teacher: "Равко / Турок" },
@@ -233,7 +233,7 @@
             { date: "2026-04-30", group: "3103", period: 4, time: "14:00-15:20", subject: "Розыск. раб. ОВД*", topic: "т. 3", type: "Сем.", room: "222 МАШ", teacher: "Ковалик Б.В.", secret: true },
 
             // =========================================================
-            // ГРУППА 3104 (Новые записи)
+            // ГРУППА 3104
             // =========================================================
             { date: "2026-04-24", group: "3104", period: 1, time: "08:30-09:50", subject: "свободное время", topic: "", type: "Отдых", room: "-", teacher: "-" },
             { date: "2026-04-24", group: "3104", period: 2, time: "10:05-11:25", subject: "ППФП", topic: "т. 29.4", type: "Пр. зан.", room: "с/з МАШ", teacher: "Равко / Турок / Волосюк / Цынкевич / Ковалик / Кайбелев" },
@@ -255,7 +255,7 @@
             { date: "2026-04-28", group: "3104", period: 4, time: "14:00-15:20", subject: "ТСП*", topic: "т. 3.2", type: "Пр. зан.", room: "228 / 245 МАШ", teacher: "Егоров Д.А. / Денисевич М.В.", secret: true },
 
             { date: "2026-04-29", group: "3104", period: 1, time: "08:30-09:50", subject: "Квал. прест-й", topic: "т. 2.3.1", type: "Пр. зан.", room: "2-419 ФКМ", teacher: "Реутская Е.А." },
-            { date: "2026-04-29", group: "3104", period: 2, time: "10:05-11:25", subject: "Гражданский процесс", topic: "т. 35-36", type: "Сем.", room: "2-419 ФКМ", teacher: "Фицук Т.М." },
+            { date: "2026-04-29", group: "3104", period: 2, time: "10:05-11:25", subject: "Гражд. пр-с", topic: "т. 35-36", type: "Сем.", room: "2-419 ФКМ", teacher: "Фицук Т.М." },
             { date: "2026-04-29", group: "3104", period: 3, time: "11:40-13:00", subject: "Огневая подготовка", topic: "т. 27.4", type: "Пр. зан.", room: "Тир МАШ", teacher: "Царь В.В. / Игнатович С.Н." },
             { date: "2026-04-29", group: "3104", period: 4, time: "14:00-15:20", subject: "Розыск. раб. ОВД*", topic: "т. 3/1", type: "Пр. зан.", room: "237 МАШ", teacher: "Кайбелев П.А.", secret: true },
 
@@ -318,6 +318,7 @@
 
         function setViewMode(mode) {
             viewMode = mode;
+            localStorage.setItem('viewMode', mode);
             document.getElementById('btnDay').className = mode === 'day' ? 'btn-mode btn-active px-4 py-1.5 uppercase' : 'btn-mode btn-inactive px-4 py-1.5 uppercase';
             document.getElementById('btnWeek').className = mode === 'week' ? 'btn-mode btn-active px-4 py-1.5 uppercase' : 'btn-mode btn-inactive px-4 py-1.5 uppercase';
             updateUI();
@@ -453,6 +454,9 @@
         const savedGroup = localStorage.getItem('savedGroup');
         if (savedGroup) gs.value = savedGroup;
 
+        // Инициализация режима просмотра
+        setViewMode(viewMode);
+
         gs.addEventListener('change', function() {
             localStorage.setItem('savedGroup', this.value);
             updateUI();
@@ -461,7 +465,6 @@
         document.getElementById('datePicker').addEventListener('change', updateUI);
         
         setInterval(updateUI, 60000); 
-        updateUI();
     </script>
 </body>
 </html>
